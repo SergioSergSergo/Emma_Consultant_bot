@@ -27,27 +27,13 @@ class WebhookServer:
         self.app.middlewares.append(RateLimitMiddleware(limiter).middleware)    
 
         # Додаємо endpoint для отримання оновлень
-        #self.app.router.add_post("/webhook", self.handle_update)
-        self.app.router.add_post("/webhook", self.handle_webhook)
+        self.app.router.add_post("/webhook", self.handle_update)
+
         # Healthcheck endpoint (для перевірки стану сервера)
         self.app.router.add_get("/health", self.health_check)
         self.app.router.add_get("/", self.handle_root)
         self.app.router.add_get("/favicon.ico", self.handle_favicon)
-    
-    from aiogram import types
-
-    async def handle_webhook(self, request):
-        data = await request.json()
-        try:
-            update = types.Update(**data)  # parse JSON into Update object
-            await self.dp.feed_update(update)
-        except Exception as e:
-            logger.exception("❌ Webhook processing error")
-            return web.Response(status=500)
-        return web.Response(status=200)
-
-
-
+  
     async def handle_favicon(self, request):
         return web.Response(status=204)
 
