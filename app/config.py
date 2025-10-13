@@ -14,3 +14,11 @@ if not GROUP_CHAT_ID:
 CALENDLY_URL = os.getenv("CALENDLY_URL")
 if not CALENDLY_URL:
     raise ValueError("CALENDLY_URL environment variable not set.")
+
+USE_WEBHOOK = os.getenv("USE_WEBHOOK", "false").lower() == "true"
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
+if USE_WEBHOOK and not WEBHOOK_URL:
+    raise ValueError("WEBHOOK_URL environment variable must be set if USE_WEBHOOK is true.")
+
+WEBAPP_HOST = os.getenv("WEBAPP_HOST", "localhost")
+WEBAPP_PORT = os.getenv("WEBAPP_PORT", 3000)

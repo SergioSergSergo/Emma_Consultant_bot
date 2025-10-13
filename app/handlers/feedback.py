@@ -4,10 +4,10 @@ from aiogram import F, Router
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
-from app.questionnaire.data import FeedbackQuestions, escape_md
+from app.data.text_classes import FeedbackQuestions, escape_md
 from app.states import Feedback
 from app.config import GROUP_CHAT_ID  # імпортуйте константу з ID групи
-from app.questionnaire.data import build_feedback_summary
+from app.data.text_classes import build_feedback_summary
 router = Router(name='feedback')
 
 

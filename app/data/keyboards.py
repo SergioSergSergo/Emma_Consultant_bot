@@ -1,5 +1,20 @@
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 
+
+START_BRIEF_INLINE_KB = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Заповнити бриф зараз", callback_data="brief_now")
+        ],
+        [
+            InlineKeyboardButton(text="Заповнити бриф пізніше", callback_data="brief_later")
+        ],
+        [
+            InlineKeyboardButton(text="Відгук про зустріч", callback_data="brief_feedback")
+        ]
+
+    ]
+)
 # --- Контакт ---
 CONTACT = ReplyKeyboardMarkup(
     keyboard=[[KeyboardButton(text="📞 Поділитися номером телефону", request_contact=True)]],

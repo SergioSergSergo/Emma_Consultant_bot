@@ -4,8 +4,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.states import Questionnaire
-from app.questionnaire.data import Questions, build_summary, escape_md
-from app.questionnaire.keyboards import YES_NO
+from app.data.text_classes import Questions, build_summary, escape_md
+from app.data.keyboards import YES_NO
 from app.config import  GROUP_CHAT_ID
 from app.config import CALENDLY_URL
 router = Router(name="confirmation_handler")

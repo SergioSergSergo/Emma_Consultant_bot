@@ -12,8 +12,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 
 from app.config import BOT_TOKEN, GROUP_CHAT_ID, CALENDLY_URL
-from app.handlers import user_cmnds
-from app.questionnaire import question_handlers, confirmation_handler, feedback
+from app.handlers import ALL_ROUTERS
 from app.middleware import ThrottlingMiddleware
 from app.logger import logger
 
@@ -45,6 +44,14 @@ async def main() -> None:
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher(storage=MemoryStorage())
 
+    # Ініціалізуємо BotCommands з готовим списком
+    bot_commands = BotCommands(COMMANDS)
+    bot.set_my_commands(commands=bot_commands.as_telegram_commands())
+
+     # Підключаємо всі роутери
+    for router in ALL_ROUTERS:
+            self.dp.include_router(router)
+
     # глобальні дані
     dp["chat_id"] = GROUP_CHAT_ID
     dp["calendly_url"] = CALENDLY_URL
@@ -58,17 +65,7 @@ async def main() -> None:
     dp.include_router(confirmation_handler.router)
     dp.include_router(feedback.router)
 
-    # налаштовуємо команди
-    # Ініціалізуємо BotCommands з готовим списком
-    bot_commands = BotCommands(COMMANDS)
-    try:
-        await retry_request(
-            bot.set_my_commands,
-            commands=bot_commands.as_telegram_commands()
-        )
-    except Exception as e:
-        logger.error(f"❌ Не вдалося налаштувати команди: {e}")
-
+   
     # видаляємо старі апдейти
     await retry_request(bot.delete_webhook, drop_pending_updates=True)
 

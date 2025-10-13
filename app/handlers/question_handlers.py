@@ -4,8 +4,8 @@ from aiogram.types import Message,  ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 
 from app.states import Questionnaire
-from app.questionnaire.data import Questions
-from app.questionnaire.keyboards import CONTACT, EMPLOYEES, LEGAL_FORM, YES_NO, FORMAT, REFERRAL
+from app.data.text_classes import Questions
+from app.data.keyboards import CONTACT, EMPLOYEES, LEGAL_FORM, YES_NO, FORMAT, REFERRAL
 
 router = Router(name="questionnaire")
 

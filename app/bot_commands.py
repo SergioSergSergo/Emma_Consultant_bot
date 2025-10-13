@@ -49,3 +49,31 @@ class BotCommands:
             BotCommand(command=cmd.command.lstrip("/"), description=cmd.short_desc)
             for cmd in self.all(after_booking=after_booking)
         ]
+
+
+
+COMMANDS = [
+    BotCommandItem(
+        key="start",
+        command="/start",
+        short_desc="Почати бот",
+        long_desc="Почати бот та побачити привітальне повідомлення",
+        access="always"
+    ),
+    BotCommandItem(
+        key="help",
+        command="/help",
+        short_desc="Довідка",
+        long_desc="Показує довідкове повідомлення",
+        access="always"
+    ),
+    BotCommandItem(
+        key="restart",
+        command="/restart_questionnaire",
+        short_desc="розпочати опитування спочатку",
+        long_desc="Обнуляє дані і повертає до першого питання анкети",
+        access="always"
+    ),
+]
+
+custom_bot_commands = BotCommands(COMMANDS)

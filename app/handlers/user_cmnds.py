@@ -2,43 +2,19 @@ from aiogram import Router
 from aiogram import F
 from aiogram.filters import Command, CommandStart
 from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
+
 import re
 
-from app.questionnaire.data import FeedbackQuestions, Questions
+from app.data.keyboards import START_BRIEF_INLINE_KB
+from app.data.text_classes import FeedbackQuestions, Questions
 from app.states import Questionnaire, Feedback
-from app.handlers.command_classes import BotCommandItem
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from app.questionnaire.confirmation_handler import provide_calendly
+from app.handlers.confirmation_handler import provide_calendly
 
 
 router = Router(name='commands')
-
-COMMANDS = [
-    BotCommandItem(
-        key="start",
-        command="/start",
-        short_desc="Почати бот",
-        long_desc="Почати бот та побачити привітальне повідомлення",
-        access="always"
-    ),
-    BotCommandItem(
-        key="help",
-        command="/help",
-        short_desc="Довідка",
-        long_desc="Показує довідкове повідомлення",
-        access="always"
-    ),
-    BotCommandItem(
-        key="restart",
-        command="/restart_questionnaire",
-        short_desc="розпочати опитування спочатку",
-        long_desc="Обнуляє дані і повертає до першого питання анкети",
-        access="always"
-    ),
-]
 
 # Стартова клавіатура
 
@@ -94,22 +70,6 @@ async def handle_brief_after_meeting(callback: CallbackQuery, state: FSMContext)
     )
     await state.set_state(Questionnaire.NAME)
 
-
-
-START_BRIEF_INLINE_KB = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(text="Заповнити бриф зараз", callback_data="brief_now")
-        ],
-        [
-            InlineKeyboardButton(text="Заповнити бриф пізніше", callback_data="brief_later")
-        ],
-        [
-            InlineKeyboardButton(text="Відгук про зустріч", callback_data="brief_feedback")
-        ]
-
-    ]
-)
 
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):

@@ -1,5 +1,5 @@
-from enum import Enum, auto
 import re
+
 class Questions:
     NAME = "Як я можу до вас звертатися?"
     PHONE = "Особистий номер телефону:"
@@ -82,13 +82,4 @@ def build_feedback_summary(data: dict) -> str:
 
     summary_text = build_summary_lines(data, fields)
     return summary_text
-
-
-'''
-   user_name = user.full_name if user.full_name else "Інформація недоступна"
-    user_nickname = f"@{user.username}" if user.username else "Користувач без username"
-    name = data.get("NAME", "—")
-
-    header = f"📬 Новий відгук від {user_name} ({user_nickname}):\n\n"
-    header += f"Ім'я: {name}\n\n"'''
 

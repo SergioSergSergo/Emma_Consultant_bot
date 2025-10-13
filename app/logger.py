@@ -15,8 +15,6 @@ class BotLogger:
         max_bytes: int = 5 * 1024 * 1024,  # 5 MB
         backup_count: int = 5
     ):
-
-
         self.logger = logging.getLogger(name)
         self.logger.setLevel(level)
         self.logger.propagate = False  # щоб не дублювало повідомлення
@@ -51,7 +49,7 @@ logger = BotLogger(
     name="bot",
     level="INFO",
     log_to_console=True,
-    log_to_file=True,
+    log_to_file=False,
     log_dir="logs",
     log_file="bot.log",
     max_bytes=10 * 1024 * 1024,
