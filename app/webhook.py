@@ -36,8 +36,8 @@ class WebhookServer:
     
     async def handle_webhook(self, request):
         data = await request.json()
-        update = self.dispatcher.bot.update_factory(data)
-        await self.dispatcher.feed_update(update)
+        update = self.bot.update_factory(data)
+        await self.dp.feed_update(update)
         return web.Response(status=200)
 
 
