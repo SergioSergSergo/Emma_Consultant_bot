@@ -18,10 +18,11 @@ class WebhookServer:
     def __init__(self, dispatcher: Dispatcher):
         self.dp = dispatcher
         self.bot = Bot(token=BOT_TOKEN)
-        self.app = web.Application()
+        self.app = web.Application(client_max_size=10*1024**2)  # 10 MB max
         self.runner = None
         self.site = None
 
+        self.app.router.add_post("/webhook", self.handle_webhook)
         # Використовуємо той самий RateLimiter
         limiter = RateLimiter(limit_per_user=1.0, limit_per_ip=0.2)
         self.app.middlewares.append(RateLimitMiddleware(limiter).middleware)    
@@ -30,7 +31,10 @@ class WebhookServer:
         self.app.router.add_post("/webhook", self.handle_update)
         # Healthcheck endpoint (для перевірки стану сервера)
         self.app.router.add_get("/health", self.health_check)
-        # Додаємо middleware (наприклад, Rate Limit)
+        self.app.router.add_get("/", self.handle_root)
+
+    async def handle_root(self, request):
+        return web.Response(text="Bot is running!")
       
     async def handle_update(self, request: web.Request) -> web.Response:
         """
