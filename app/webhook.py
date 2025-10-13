@@ -7,7 +7,7 @@ from aiogram.types import Update
 from app.config import BOT_TOKEN, WEBHOOK_URL, WEBAPP_HOST, WEBAPP_PORT
 from app.logger import logger
 from app.middleware import RateLimiter, RateLimitMiddleware
-
+from aiogram import types
 
 class WebhookServer:
     """
@@ -34,11 +34,18 @@ class WebhookServer:
         self.app.router.add_get("/", self.handle_root)
         self.app.router.add_get("/favicon.ico", self.handle_favicon)
     
+    from aiogram import types
+
     async def handle_webhook(self, request):
         data = await request.json()
-        update = self.bot.update_factory(data)
-        await self.dp.feed_update(update)
+        try:
+            update = types.Update(**data)  # parse JSON into Update object
+            await self.dp.feed_update(update)
+        except Exception as e:
+            logger.exception("❌ Webhook processing error")
+            return web.Response(status=500)
         return web.Response(status=200)
+
 
 
     async def handle_favicon(self, request):
