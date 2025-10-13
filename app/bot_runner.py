@@ -19,10 +19,10 @@ class BotRunner:
         self.dp = Dispatcher()
 
          # Створюємо спільний RateLimiter
-        self.rate_limiter = RateLimiter(limit_per_user=1.0, limit_per_ip=0.2)
+        #self.rate_limiter = RateLimiter(limit_per_user=1.0, limit_per_ip=0.2)
 
         # Підключаємо middleware для POLLING
-        self.dp.message.middleware(ThrottlingMiddleware(self.rate_limiter))
+        #self.dp.message.middleware(ThrottlingMiddleware(self.rate_limiter))
 
         # Підключаємо всі роутери
         for router in ALL_ROUTERS:
@@ -50,7 +50,7 @@ class BotRunner:
     async def run_webhook(self):
         """Запуск у режимі webhook"""
         logger.info("🌐 Starting bot in WEBHOOK mode...")
-        server = WebhookServer(dispatcher=self.dp)
+        server = WebhookServer(dispatcher=self.dp, bot=self.bot)
         await server.run()
 
     async def run(self):

@@ -15,9 +15,9 @@ class WebhookServer:
     Використовується з aiogram 3.x
     """
 
-    def __init__(self, dispatcher: Dispatcher):
+    def __init__(self, dispatcher: Dispatcher, bot: Bot):
         self.dp = dispatcher
-        self.bot = Bot(token=BOT_TOKEN)
+        self.bot = bot
         self.app = web.Application(client_max_size=10*1024**2)  # 10 MB max
         self.runner = None
         self.site = None
