@@ -1,0 +1,35 @@
+from aiogram.fsm.state import StatesGroup, State
+
+class Questionnaire(StatesGroup):
+    NAME = State()
+    PHONE = State()
+    BUSINESS = State()
+    WEBSITE = State()
+    EMPLOYEES = State()
+    LEGAL_FORM = State()
+    ROLES = State()
+    FIN_KNOWLEDGE = State()
+    FIN_PERSON = State()
+    FIN_REPORTS = State()
+    CRM = State()
+    CRM_NAME = State()
+    FINMAP = State()
+    GOOGLE_SHEETS = State()
+    MEETINGS = State()
+    MEETING_DETAILS = State()
+    REQUESTS = State()
+    USED_CONSULTANTS = State()
+    FORMAT = State()
+    REFERRAL = State()
+    CONFIRM = State()
+    CALLENDLY = State()
+
+
+class Feedback(StatesGroup):
+    NAME = State()
+    PHONE = State()
+    Q1 = State()
+    Q2 = State()
+    Q3 = State()
+    Q4 = State()
+    DONE = State()
