@@ -22,7 +22,6 @@ class WebhookServer:
         self.runner = None
         self.site = None
 
-        self.app.router.add_post("/webhook", self.handle_webhook)
         # Використовуємо той самий RateLimiter
         limiter = RateLimiter(limit_per_user=1.0, limit_per_ip=0.2)
         self.app.middlewares.append(RateLimitMiddleware(limiter).middleware)    
