@@ -56,7 +56,7 @@ async def handle_brief_choice(callback: CallbackQuery, state: FSMContext):
             ]
         )
         await callback.message.answer(
-        "Щоб найкраще підготуватися до запланованої зустрічі, заповніть, будь ласка, **короткий бриф** у зручний для вас час до розмови:",
+        "Щоб найкраще підготуватися до запланованої зустрічі, заповніть, будь ласка, **короткий бриф**:",
         reply_markup=kb, parse_mode="Markdown" )
         await state.set_state(Questionnaire.CALLENDLY)
 

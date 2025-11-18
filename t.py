@@ -1,7 +1,7 @@
 import requests
 
 TOKEN = "8383944385:AAEKFHCb4kTvX8ftR8YhWSmzEv8jXpBkmfY"
-WEBHOOK_URL = "https://emmaconsultantbot-production.up.railway.app/webhook"
+WEBHOOK_URL = "https://emmaconsultantbot-production-96cc.up.railway.app/webhook"
 
 # 1️⃣ Check current webhook info
 resp = requests.get(f"https://api.telegram.org/bot{TOKEN}/getWebhookInfo").json()
