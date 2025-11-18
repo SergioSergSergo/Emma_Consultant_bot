@@ -105,7 +105,7 @@ async def feedback_confirm(message: Message, state: FSMContext):
             parse_mode="Markdown"
         )
         await message.answer(
-            "✅ Дякуємо за ваш відгук! Він дуже важливий для нас 💙",
+            "✅ Дякуємо за ваш відгук! Він дуже важливий 💙",
             reply_markup=ReplyKeyboardRemove()
         )
         await state.clear()
