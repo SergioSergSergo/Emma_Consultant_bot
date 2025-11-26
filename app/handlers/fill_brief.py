@@ -2,34 +2,42 @@
 from aiogram import Router, F
 from aiogram.types import Message,  ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery
+from aiogram.types import  InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.states import Questionnaire
-from app.data.text_classes import Questions
-from app.data.keyboards import CONTACT, EMPLOYEES, LEGAL_FORM, YES_NO, FORMAT, REFERRAL
-
+from app.data.text_classes import Questions, build_summary, escape_md
+from app.config import  GROUP_CHAT_ID
+from app.config import CALENDLY_URL
+from app.data.keyboards import CONTACT_INLINE, EMPLOYEES, LEGAL_FORM, YES_NO, FORMAT, REFERRAL
+from app.handlers.user_cmnds import send_start_message
 router = Router(name="questionnaire")
 
-
-# === Анкета ===
+# Початок анкети
+@router.callback_query(F.data == "fill_brief")
+async def start_questionnaire(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    await state.clear()
+    await callback.message.answer(
+        Questions.NAME,
+        reply_markup=ReplyKeyboardRemove()
+    )
+    await state.set_state(Questionnaire.NAME)
 
 # 1. Ім'я
 @router.message(Questionnaire.NAME, F.text)
 async def get_name(message: Message, state: FSMContext):
     await state.update_data(NAME=message.text)
-    await message.answer("📲 Поділіться своїм номером телефону:", reply_markup=CONTACT)
+    await message.answer(Questions.PHONE)
     await state.set_state(Questionnaire.PHONE)
 
-# 2. Телефон
+# 2. Телефон 
 @router.message(Questionnaire.PHONE)
 async def get_phone(message: Message, state: FSMContext):
-    if message.contact:
-        await state.update_data(PHONE=message.contact.phone_number)
-    else:
-        await message.answer("⚠️ Поділіться своїм номером телефону, натиснувши кнопку.")
-        return
-
-    await message.answer(Questions.BUSINESS, reply_markup=ReplyKeyboardRemove())
-    await state.set_state(Questionnaire.BUSINESS)# !!!!!!!!!!!!!!!!!!!!!!!!!!
+    phone = message.text.strip()
+    await state.update_data(PHONE=phone)
+    await message.answer(Questions.BUSINESS)
+    await state.set_state(Questionnaire.BUSINESS)
 
 # 3. Бізнес
 @router.message(Questionnaire.BUSINESS, F.text)
@@ -164,3 +172,57 @@ async def get_format(message: Message, state: FSMContext):
     await message.answer(Questions.REFERRAL, reply_markup=REFERRAL)
     await state.set_state(Questionnaire.REFERRAL)
 
+
+# 20. Джерело інформації
+@router.message(Questionnaire.REFERRAL, F.text)
+async def get_referral(message: Message, state: FSMContext):
+    await state.update_data(REFERRAL=message.text)
+
+    data = await state.get_data()
+    summary = build_summary(data)
+
+    await message.answer(
+        f"*{Questions.CONFIRM}*\n\n{summary}\n\nВсе правильно?",
+        parse_mode="Markdown",
+        reply_markup=YES_NO
+    )
+    await state.set_state(Questionnaire.CONFIRM)
+
+@router.message(Questionnaire.CONFIRM, F.text)
+async def get_confirm(message: Message, state: FSMContext):
+    user_answer = message.text.lower()
+    await state.update_data(CONFIRM=user_answer)
+
+    data = await state.get_data()
+    summary = build_summary(data)  # формуємо актуальний текст підсумку
+
+    if user_answer in ["так", "yes"]:
+        # Формуємо текст з ім'ям користувача та його Telegram ID
+        # Формуємо шапку зовні
+        user_name = escape_md(message.from_user.full_name or "Інформація недоступна")
+        user_nickname = escape_md(f"@{message.from_user.username}" if message.from_user.username else "Користувач без username")
+        name = escape_md(data.get("NAME", "—"))
+
+        header = f"📬 Нова анкета від {user_name} ({user_nickname}):\n\n"
+        header += f"Ім'я: {name}\n\n"
+
+        # Генеруємо текст фідбеку без шапки
+        text = header + build_summary(data)
+
+        await message.bot.send_message(
+            chat_id=GROUP_CHAT_ID,
+            text=text,
+            parse_mode="Markdown"
+        )
+
+        await message.answer("✅ Дякуємо! Анкета збережена.", reply_markup=ReplyKeyboardRemove())
+
+        await state.clear()
+        await send_start_message(message, state)
+
+        
+    else:
+        await message.answer(
+            "Добре, давайте почнемо спочатку. Введіть /restart_questionnaire"
+        )
+        # залишаємо стан CONFIRM

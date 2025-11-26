@@ -61,13 +61,6 @@ COMMANDS = [
         access="always"
     ),
     BotCommandItem(
-        key="help",
-        command="/help",
-        short_desc="Довідка",
-        long_desc="Показує довідкове повідомлення",
-        access="always"
-    ),
-    BotCommandItem(
         key="restart",
         command="/restart_questionnaire",
         short_desc="розпочати опитування спочатку",

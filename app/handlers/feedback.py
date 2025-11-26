@@ -5,11 +5,17 @@ from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKey
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from app.data.text_classes import FeedbackQuestions, escape_md
+from app.handlers.user_cmnds import send_start_message
 from app.states import Feedback
 from app.config import GROUP_CHAT_ID  # імпортуйте константу з ID групи
 from app.data.text_classes import build_feedback_summary
 router = Router(name='feedback')
 
+@router.callback_query(F.data == "give_feedback")
+async def start_feedback(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()  # Прибираємо "loading" у Telegram
+    await callback.message.answer(FeedbackQuestions.NAME, reply_markup=ReplyKeyboardRemove())
+    await state.set_state(Feedback.NAME)
 
 @router.message(Feedback.NAME)
 async def feedback_name(message: Message, state: FSMContext):
@@ -17,18 +23,15 @@ async def feedback_name(message: Message, state: FSMContext):
     await message.answer(FeedbackQuestions.Q1)
     await state.set_state(Feedback.Q1)
 
-
 @router.message(Feedback.Q1)
 async def feedback_q1(message: Message, state: FSMContext):
     await state.update_data(q1=message.text)
     await message.answer(FeedbackQuestions.Q2)
     await state.set_state(Feedback.Q2)
 
-
 @router.message(Feedback.Q2)
 async def feedback_q2(message: Message, state: FSMContext):
     await state.update_data(q2=message.text)
-
     scale_kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text=str(i), callback_data=f"rate_{i}") for i in range(0, 6)],
@@ -37,7 +40,6 @@ async def feedback_q2(message: Message, state: FSMContext):
     )
     await message.answer(FeedbackQuestions.Q3, reply_markup=scale_kb)
     await state.set_state(Feedback.Q3)
-
 
 @router.callback_query(F.data.startswith("rate_"))
 async def feedback_q3(callback: CallbackQuery, state: FSMContext):
@@ -55,7 +57,6 @@ async def feedback_q3(callback: CallbackQuery, state: FSMContext):
         ],
         resize_keyboard=True
     )
-
     await callback.message.answer(FeedbackQuestions.Q4, reply_markup=kb)
     await state.set_state(Feedback.Q4)
 
@@ -109,6 +110,10 @@ async def feedback_confirm(message: Message, state: FSMContext):
             reply_markup=ReplyKeyboardRemove()
         )
         await state.clear()
+        
+
+        await send_start_message(message, state)
+
     else:
         await message.answer(
             "Якщо хочете заповнити відгук ще раз — натисніть /start",

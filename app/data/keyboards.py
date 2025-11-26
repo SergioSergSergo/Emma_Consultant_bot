@@ -1,25 +1,27 @@
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+from app.config import CALENDLY_URL
 
+btn_choose_meeting_time = InlineKeyboardButton(
+    text="📅 Обрати час зустрічі",
+    url=CALENDLY_URL
+)
+
+btn_fill_brief = InlineKeyboardButton(
+    text="📝 Заповнити бриф",
+    callback_data="fill_brief"
+)
+
+btn_feedback = InlineKeyboardButton(
+    text="⭐ Надати відгук про зустріч",
+    callback_data="give_feedback"
+)
 
 START_BRIEF_INLINE_KB = InlineKeyboardMarkup(
     inline_keyboard=[
-        [
-            InlineKeyboardButton(text="Заповнити бриф зараз", callback_data="brief_now")
-        ],
-        [
-            InlineKeyboardButton(text="Заповнити бриф пізніше", callback_data="brief_later")
-        ],
-        [
-            InlineKeyboardButton(text="Відгук про зустріч", callback_data="brief_feedback")
-        ]
-
+      [btn_choose_meeting_time],
+      [btn_fill_brief],
+        [btn_feedback]
     ]
-)
-# --- Контакт ---
-CONTACT = ReplyKeyboardMarkup(
-    keyboard=[[KeyboardButton(text="📞 Поділитися номером телефону", request_contact=True)]],
-    resize_keyboard=True,
-    one_time_keyboard=True
 )
 
 # --- Кількість працівників ---
@@ -82,3 +84,18 @@ REFERRAL = ReplyKeyboardMarkup(
 def calendly(url: str) -> InlineKeyboardMarkup:
     keyboard = [[InlineKeyboardButton(text="📅 Забронювати зустріч", url=url)]]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
+
+# --- Контакт ---
+CONTACT = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="📞 Поділитися номером телефону", request_contact=True)]],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
+CONTACT_INLINE = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="📞 Поділитися номером телефону", callback_data="share_phone")]
+    ]
+)

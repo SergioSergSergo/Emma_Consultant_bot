@@ -7,31 +7,75 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 import re
-
 from app.data.keyboards import START_BRIEF_INLINE_KB
 from app.data.text_classes import FeedbackQuestions, Questions
 from app.states import Questionnaire, Feedback
-from app.handlers.confirmation_handler import provide_calendly
 
 
 router = Router(name='commands')
-
 # Стартова клавіатура
 
-# Обробка вибору користувача
-@router.message(Questionnaire.CALLENDLY, F.text)
-async def choose_brief(message: Message, state: FSMContext):
-    if message.text == "Заповнити бриф зараз":
-        await message.answer(
-            Questions.NAME, parse_mode="Markdown", reply_markup=None
-        )
-        await state.set_state(Questionnaire.NAME)
-    elif message.text == "Заповнити бриф пізніше":
-        await provide_calendly(message, state)  # одразу показуємо кнопку Calendly
-    else:
-        await message.answer("Будь ласка, оберіть одну з доступних опцій.")
+@router.message(CommandStart())
+async def cmd_start(message: Message, state: FSMContext):
+    await send_start_message(message, state)
 
 
+async def send_start_message(message: Message, state: FSMContext):
+    """Старт опитування з вибором дії через Inline кнопки"""
+    await state.clear()  # очищаємо попередні дані
+
+    user = message.from_user
+    await message.answer(
+        f"Вітаю, <b>{user.first_name or 'шановний користувачу'}</b>! 👋\n\n"
+        "Я — бот команди <b>Emma Consults</b> і допоможу підготувати базову інформацію перед вашою зустріччю з фінансовим експертом.\n\n"
+        "Щоб підвищити ефективність сесії, я пропоную заповнити <b>короткий бриф</b>.\n\n"
+        "Ви можете обрати один із варіантів:\n"
+        "• 📅 <b>Запланувати зустріч</b> у зручний для вас час через Calendly.\n"
+        "• 📝 <b>Заповнити бриф</b> — я поставлю кілька простих запитань.\n"
+        "• ⭐ <b>Залишити відгук</b> про зустріч.\n\n"
+        "ℹ️ Ви завжди можете перезапустити бот командою /start\n",
+        parse_mode="HTML",
+        reply_markup=START_BRIEF_INLINE_KB,
+    )
+    await state.set_state(Questionnaire.CALLENDLY)
+
+
+def escape_md(text: str) -> str:
+    return re.sub(r'([_*\[\]()~`>#+\-=|{}!])', r'\\\1', text)
+
+
+@router.message(Command("help"))
+async def cmd_help(message: Message):
+    """Довідка"""
+    text = (
+        "💡 Довідка по боту EMMA Consulting\n\n"
+        "Цей бот допоможе вам пройти опитування і забронювати зустріч з фінансовим експертом.\n\n"
+        "Основні команди:\n"
+        "• /start — почати спілкування з ботом\n"
+        "• /restart_questionnaire — почати опитування заново\n"
+    )
+    await message.answer( escape_md(text), parse_mode="MarkdownV2")
+
+
+@router.message(Command("restart_questionnaire"))
+async def cmd_restart(message: Message, state: FSMContext):
+    """Почати опитування заново"""
+    await state.clear()
+
+    await message.answer(
+        "🔄 Ви розпочали анкету спочатку.\n\n"
+        f"{Questions.NAME}",
+        reply_markup=ReplyKeyboardRemove(),
+        parse_mode="Markdown"
+    )
+
+    await state.set_state(Questionnaire.NAME)
+
+
+
+
+
+'''
 @router.callback_query(F.data.in_({"brief_now", "brief_later"}))
 async def handle_brief_choice(callback: CallbackQuery, state: FSMContext):
     await callback.answer()  # закриває "loading" у Telegram
@@ -69,83 +113,4 @@ async def handle_brief_after_meeting(callback: CallbackQuery, state: FSMContext)
     )
     await state.set_state(Questionnaire.NAME)
 
-
-@router.message(CommandStart())
-async def cmd_start(message: Message, state: FSMContext):
-    """Старт опитування з вибором дії через Inline кнопки"""
-    await state.clear()  # очищаємо попередні дані
-
-    user = message.from_user
-    await message.answer(
-        f"Вітаю, <b>{user.first_name or 'шановний користувачу'}</b>! 👋\n\n"
-        "Я — бот команди <b>Emma Consults</b> і допоможу підготувати базову інформацію перед вашою зустріччю з фінансовим експертом.\n\n"
-        "Щоб підвищити ефективність сесії, я пропоную заповнити короткий бриф. Ви можете:\n"
-        "• Заповнити бриф <b>зараз</b> — я поставлю кілька простих питань.\n"
-        "• Заповнити бриф <b>пізніше</b> — обрати зручний час для зустрічі через Calendly 📅.\n"
-        "• Надати відгук про зустріч.\n\n"
-        "ℹ️ Також ви завжди можете:\n"
-        "• почати опитування заново — командою /restart_questionnaire\n"
-        "• перезапустити бота — командою /start\n"
-        "• отримати довідку — командою /help",
-        parse_mode="HTML",
-        reply_markup=START_BRIEF_INLINE_KB,  # кнопки під текстом
-    )
-
-    await state.set_state(Questionnaire.CALLENDLY)
-
-
-def escape_md(text: str) -> str:
-    return re.sub(r'([_*\[\]()~`>#+\-=|{}.!])', r'\\\1', text)
-
-
-@router.message(Command("help"))
-async def cmd_help(message: Message):
-    """Довідка"""
-    text = (
-        "💡 Довідка по боту EMMA Consulting\n\n"
-        "Цей бот допоможе вам пройти опитування і забронювати зустріч з фінансовим експертом.\n\n"
-        "Основні команди:\n"
-        "• /start — почати спілкування з ботом\n"
-        "• /restart_questionnaire — почати опитування заново\n"
-        "• /help — показати це повідомлення\n\n"
-    )
-
-    await message.answer(
-        escape_md(text),
-        parse_mode="MarkdownV2"
-    )
-
-
-@router.message(Command("restart_questionnaire"))
-async def cmd_restart(message: Message, state: FSMContext):
-    """Почати опитування заново"""
-    await state.clear()
-
-    await message.answer(
-        "🔄 Ви розпочали анкету спочатку.\n\n"
-        f"{Questions.NAME}",
-        reply_markup=ReplyKeyboardRemove(),
-        parse_mode="Markdown"
-    )
-
-    await state.set_state(Questionnaire.NAME)
-    
-@router.callback_query(F.data == "brief_feedback")
-async def start_feedback(callback: CallbackQuery, state: FSMContext):
-    await callback.answer()
-    await state.clear()
-
-    # Перше повідомлення — привітання
-    await callback.message.answer(
-        "💬 Ваш відгук буде дуже корисним.",
-        parse_mode="Markdown",
-        reply_markup=ReplyKeyboardRemove()
-    )
-
-    # Друге повідомлення — питання про ім'я
-    await callback.message.answer(
-        FeedbackQuestions.NAME,
-        parse_mode="Markdown",
-    )
-
-    await state.set_state(Feedback.NAME)
+'''
